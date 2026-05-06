@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://apache.org">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.svd2hal</groupId>
+    <artifactId>svd2hal</artifactId>
+    <version>1.0</version>
+
+	<repositories>
+	    <repository>
+	        <id>io.github</id>
+	        <url>https://github.com</url>
+	    </repository>
+	</repositories>
+
+    <properties>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <maven.compiler.source.version>21</maven.compiler.source.version>
+        <maven.compiler.target.version>21</maven.compiler.target.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+        <maven-shade-plugin.version>3.5.2</maven-shade-plugin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	  	<picocli.version>4.7.0</picocli.version>
+	  	<svd-parser.version>v0.0.10</svd-parser.version>
+    </properties>
+
+    <dependencies>
+        <!-- SVD Parser for reading CMSIS-SVD files -->
+		<dependency>
+		    <groupId>io.github.antoniovazquezblanco</groupId>
+		    <artifactId>svd-parser</artifactId>
+		    <version>${svd-parser.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>info.picocli</groupId>
+		    <artifactId>picocli</artifactId>
+		    <version>${picocli.version}</version>
+		</dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+	      <plugin>
+	        <artifactId>maven-compiler-plugin</artifactId>
+	        <version>${maven-compiler-plugin.version}</version>
+	        <configuration>
+	          <source>${maven.compiler.source.version}</source>
+	          <target>${maven.compiler.target.version}</target>
+	        </configuration>
+	      </plugin>
+			<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-shade-plugin</artifactId>
+		    <version>${maven-shade-plugin.version}</version>
+		    <executions>
+		        <execution>
+		            <phase>package</phase>
+		            <goals>
+		                <goal>shade</goal>
+		            </goals>
+		            <configuration>
+		                <transformers>
+		                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+            			        <mainClass>com.svd2hal.Svd2hal</mainClass>
+		                    </transformer>
+		                </transformers>
+		                <createDependencyReducedPom>false</createDependencyReducedPom>
+		            </configuration>
+		        </execution>
+		    </executions>
+		</plugin>
+        </plugins>
+    </build>
+</project>
