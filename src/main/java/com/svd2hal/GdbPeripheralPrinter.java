@@ -39,20 +39,28 @@ public class GdbPeripheralPrinter {
 					stream.append(String.format("    ##        %-7s        ##\n", register.getName()));
 					stream.append(String.format("    ###########################\n", register.getName()));
 					stream.append(String.format("    set $addr = $baseaddr + $%s\n", register.getName()));
+					stream.append(String.format("    set $data = *$addr\n"));
 					stream.append(String.format("    printf \"%s.%-7s 0x%%4x %%4x: 0x%%08x\", ($addr >> 16), ($addr & 0xFFFF), *$addr \n", 
 							_peripheral.getName(), register.getName()));
 					register.getFields().sort((x,y) -> (-1 * x.getBitOffset().compareTo(y.getBitOffset())));
-					if (register.getFields().size() > 1) {
+					if (register.getFields().size() > 0) {
 						stream.append(String.format("    printf \"     \"\n"));
 						register.getFields().forEach(field -> {
 							try {
-								stream.append(String.format("    printf \"%s:%%d \", (($addr >> %d) & 0x%02x)\n", 
-										field.getName(), field.getBitOffset(), (1 << field.getBitWidth())-1));
+								String width = String.format("%d%s%s", 
+										field.getBitOffset()+field.getBitWidth()-1, 
+										(field.getBitWidth() > 1 ? ":":""), 
+										(field.getBitWidth() > 1 ? field.getBitOffset().toString():""));
+								stream.append(String.format("    printf \"%s[%s]=%%d \", (($data >> %d) & 0x%02x)\n", 
+										field.getName(), width, field.getBitOffset(), (1 << field.getBitWidth())-1));
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						});
+					}
+					else {
+						var I = 0;
 					}
 					stream.append(String.format("    printf \"\\n\"\n"));
 					stream.append(String.format("\n"));

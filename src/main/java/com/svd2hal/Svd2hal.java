@@ -30,7 +30,11 @@ public class Svd2hal implements Runnable {
             var device = SvdDevice.fromFile(svdFile);
             
             if (task.compareTo("gdbinit") == 0) {
-            	gdbinintTask(device);
+            	gdbinitTask(device);
+            }
+            
+            if (task.compareTo("hal") == 0) {
+            	halTask(device);
             }
             
         } catch (Exception e) {
@@ -39,7 +43,7 @@ public class Svd2hal implements Runnable {
         }
 	}
 	
-	private void gdbinintTask(SvdDevice device) {
+	private void gdbinitTask(SvdDevice device) {
 
         System.out.println("Microcontroller: " + device.getName());
         System.out.println("CPU: " + device.getCpu().getName());
@@ -48,7 +52,7 @@ public class Svd2hal implements Runnable {
         try {
 	        //
 	        // iterate over all peripheral
-	        var dirname = String.format("%s\\%s\\gdbinit", outputDirectory, device.getName().toLowerCase());
+	        var dirname = outputDirectory;
 	        Files.createDirectories(Paths.get(dirname));
 	        for (var peripheral : device.getPeripherals()) {
 	            System.out.printf("%nPeripheral: %-10s | Base Address: 0x%08X%n", 
@@ -66,7 +70,31 @@ public class Svd2hal implements Runnable {
 			ex.printStackTrace();
         }		
 	}
+	
+	private void halTask(SvdDevice device) {
 
+        System.out.println("Microcontroller: " + device.getName());
+        System.out.println("CPU: " + device.getCpu().getName());
+        System.out.println("------------------------------------");
+
+        try {
+	        //
+	        // iterate over all peripherals
+        	device.getPeripherals().sort((x, y) -> (x.getName().compareTo(y.getName())));
+	        for (var peripheral : device.getPeripherals()) {
+		        var dirname = String.format("%s\\%s", outputDirectory, peripheral.getName().toUpperCase());
+		        Files.createDirectories(Paths.get(dirname));
+	            System.out.printf("Peripheral: %-15s | Base Address: 0x%08X%n", 
+	                              peripheral.getName(), 
+	                              peripheral.getBaseAddr());
+	      	    var printer = new HalPeripheralPrinter(peripheral, dirname);
+	      	    printer.print();
+	        }
+        }
+        catch (Exception ex) {
+			ex.printStackTrace();
+        }		
+	}
     public static void main(String[] args) {
         int exitCode = new CommandLine(new Svd2hal()).execute(args);
         System.exit(exitCode);
