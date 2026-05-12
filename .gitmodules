@@ -1,0 +1,3 @@
+[submodule "3rd/stm32_svd"]
+	path = 3rd/stm32_svd
+	url = https://github.com/stm32duino/stm32_svd.git
